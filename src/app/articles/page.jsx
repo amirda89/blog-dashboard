@@ -6,7 +6,7 @@ import EditArticle from "./EditArticle";
 export default function Articles() {
   const [articles, setArticles] = useState([]);
   useEffect(() => {
-    fetch("https://dev.to/api/articles?username=gabrielanhaia&per_page=3")
+    fetch("api/articles")
       .then((res) => res.json())
       .then((result) => setArticles(result));
   }, []);

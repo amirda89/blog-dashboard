@@ -12,12 +12,12 @@ export default function EditArticle() {
           <div className="modal-box">
             <input
               type="text"
-              placeholder="here"
+              placeholder="Title"
               className="input w-full mb-8"
             />
             <textarea
               className="textarea w-full mb-8"
-              placeholder="Bio"
+              placeholder="Description"
             ></textarea>
             <div className="modal-action">
               <form method="dialog">
