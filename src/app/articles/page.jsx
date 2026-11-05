@@ -5,11 +5,46 @@ import EditArticle from "./EditArticle";
 
 export default function Articles() {
   const [articles, setArticles] = useState([]);
+  const [editingArticle, setEditingArticle] = useState(null);
+
   useEffect(() => {
     fetch("api/articles")
       .then((res) => res.json())
       .then((result) => setArticles(result));
   }, []);
+
+  function unpublishArticle(id) {
+    fetch(`api/articles`, {
+      method: "PATCH",
+      body: JSON.stringify(id),
+    }).then((res) => {
+      if (res.ok) {
+        setArticles(articles.filter((art) => art.id !== id));
+      }
+    });
+  }
+
+  function openEditModal(article) {
+    setEditingArticle({ ...article });
+    document.getElementById("edit").showModal();
+  }
+
+  function saveEditedArticle() {
+    fetch(`api/articles`, {
+      method: "PUT",
+      body: JSON.stringify(editingArticle),
+    })
+      .then((res) => res.json())
+      .then((updatedArticle) => {
+        setArticles(
+          articles.map((article) =>
+            article.id === updatedArticle.id ? updatedArticle : article,
+          ),
+        );
+        document.getElementById("edit").close();
+        window.location.reload();
+      });
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -18,11 +53,6 @@ export default function Articles() {
         {/* head */}
         <thead>
           <tr>
-            <th>
-              <label>
-                <input type="checkbox" className="checkbox" />
-              </label>
-            </th>
             <th>Title</th>
             <th>Description</th>
             <th></th>
@@ -32,21 +62,8 @@ export default function Articles() {
           {/* rows */}
           {articles.map((article) => (
             <tr key={article.id}>
-              <th>
-                <label>
-                  <input type="checkbox" className="checkbox" />
-                </label>
-              </th>
               <td>
                 <div className="flex items-center gap-3">
-                  <div className="avatar">
-                    <div className="mask mask-squircle h-12 w-12">
-                      <img
-                        src={article.cover_image}
-                        alt={article.description}
-                      />
-                    </div>
-                  </div>
                   <div>
                     <div className="font-bold">{article.title}</div>
                     <div className="text-sm opacity-50">
@@ -56,7 +73,7 @@ export default function Articles() {
                 </div>
               </td>
               <td>
-                {article.description}
+                {article.body_markdown}
                 <br />
                 {article?.tag_list.map((tag) => (
                   <span key={tag} className="badge badge-ghost badge-sm">
@@ -64,10 +81,85 @@ export default function Articles() {
                   </span>
                 ))}
               </td>
+              <th>
+                <button
+                  className="btn btn-ghost btn-xs"
+                  onClick={() => openEditModal(article)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                    />
+                  </svg>
+                </button>
+              </th>
+              <th>
+                <button
+                  className="btn btn-ghost btn-xs"
+                  onClick={() => unpublishArticle(article.id)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                    />
+                  </svg>
+                </button>
+              </th>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <dialog id="edit" className="modal">
+        <div className="modal-box">
+          <input
+            value={editingArticle?.title}
+            onChange={(e) =>
+              setEditingArticle({ ...editingArticle, title: e.target.value })
+            }
+            type="text"
+            placeholder="Title"
+            className="input w-full mb-8"
+          />
+          <textarea
+            value={editingArticle?.body_markdown}
+            onChange={(e) =>
+              setEditingArticle({
+                ...editingArticle,
+                body_markdown: e.target.value,
+              })
+            }
+            className="textarea w-full mb-8"
+            placeholder="Body markdown"
+          ></textarea>
+          <div className="modal-action">
+            <form method="dialog">
+              <button className="btn">Close</button>
+            </form>
+            <button className="btn btn-primary" onClick={saveEditedArticle}>
+              Publish
+            </button>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 }
