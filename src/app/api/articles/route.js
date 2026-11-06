@@ -1,6 +1,6 @@
 export async function GET() {
   const res = await fetch("https://dev.to/api/articles/me/published", {
-    headers: { api_key: "Kfxu1zBnT9ZQMaJHUYpHUUzn" },
+    headers: { api_key: process.env.DEVTO_API_KEY },
   });
   const result = await res.json();
   return Response.json(result);
@@ -11,7 +11,7 @@ export async function POST(request) {
   const res = await fetch("https://dev.to/api/articles", {
     method: "POST",
     headers: {
-      api_key: "Kfxu1zBnT9ZQMaJHUYpHUUzn",
+      api_key: process.env.DEVTO_API_KEY,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -30,7 +30,7 @@ export async function PUT(request) {
   const res = await fetch(`https://dev.to/api/articles/${article.id}`, {
     method: "PUT",
     headers: {
-      api_key: "Kfxu1zBnT9ZQMaJHUYpHUUzn",
+      api_key: process.env.DEVTO_API_KEY,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -48,7 +48,7 @@ export async function PATCH(request) {
   const res = await fetch(`https://dev.to/api/articles/${id}`, {
     method: "PATCH",
     headers: {
-      api_key: "Kfxu1zBnT9ZQMaJHUYpHUUzn",
+      api_key: process.env.DEVTO_API_KEY,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
