@@ -26,8 +26,8 @@ export async function POST(request) {
 }
 
 export async function PUT(request) {
-  const article = await request.json();
-  const res = await fetch(`https://dev.to/api/articles/${article.id}`, {
+  const { title, markdown, id } = await request.json();
+  const res = await fetch(`https://dev.to/api/articles/${id}`, {
     method: "PUT",
     headers: {
       api_key: "Kfxu1zBnT9ZQMaJHUYpHUUzn",
@@ -35,8 +35,8 @@ export async function PUT(request) {
     },
     body: JSON.stringify({
       article: {
-        title: article.title,
-        body_markdown: article.body_markdown,
+        title: title,
+        body_markdown: markdown,
       },
     }),
   });

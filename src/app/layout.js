@@ -1,6 +1,7 @@
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import "./globals.css";
+import { ToastContainer } from "react-toastify";
 
 export const metadata = {
   title: "Blog Dashboard",
@@ -14,6 +15,13 @@ export default function RootLayout({ children }) {
         <Header />
         <main className="min-h-screen my-16 mx-auto max-w-7xl">{children}</main>
         <Footer />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={2000}
+          hideProgressBar={true}
+          theme="dark"
+          pauseOnHover={false}
+        />
       </body>
     </html>
   );

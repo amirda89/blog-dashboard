@@ -2,53 +2,48 @@
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import EditArticle from "./EditArticle";
+import { toast } from "react-toastify";
 
 export default function Articles() {
   const [articles, setArticles] = useState([]);
-  const [editingArticle, setEditingArticle] = useState(null);
+  const [editing, setEditing] = useState(null);
 
-  useEffect(() => {
+  function loadArticle() {
     fetch("api/articles")
       .then((res) => res.json())
-      .then((result) => setArticles(result));
+      .then((result) => {
+        setArticles(result);
+      });
+  }
+
+  useEffect(() => {
+    loadArticle();
   }, []);
 
-  function unpublishArticle(id) {
-    fetch(`api/articles`, {
+  async function unpublishArticle(id) {
+    await fetch(`api/articles`, {
       method: "PATCH",
       body: JSON.stringify(id),
     }).then((res) => {
       if (res.ok) {
-        setArticles(articles.filter((art) => art.id !== id));
+        loadArticle();
       }
     });
+    toast.success("Successfully deleted! /unpublished/");
   }
 
   function openEditModal(article) {
-    setEditingArticle({ ...article });
-    document.getElementById("edit").showModal();
-  }
-
-  function saveEditedArticle() {
-    fetch(`api/articles`, {
-      method: "PUT",
-      body: JSON.stringify(editingArticle),
-    })
-      .then((res) => res.json())
-      .then((updatedArticle) => {
-        setArticles(
-          articles.map((article) =>
-            article.id === updatedArticle.id ? updatedArticle : article,
-          ),
-        );
-        document.getElementById("edit").close();
-        window.location.reload();
-      });
+    setEditing(article);
+    document.getElementById("editArticle").showModal();
   }
 
   return (
     <div className="overflow-x-auto">
-      <EditArticle />
+      <EditArticle
+        onAdd={loadArticle}
+        editing={editing}
+        setEditing={setEditing}
+      />
       <table className="table">
         {/* head */}
         <thead>
@@ -127,39 +122,6 @@ export default function Articles() {
           ))}
         </tbody>
       </table>
-
-      <dialog id="edit" className="modal">
-        <div className="modal-box">
-          <input
-            value={editingArticle?.title}
-            onChange={(e) =>
-              setEditingArticle({ ...editingArticle, title: e.target.value })
-            }
-            type="text"
-            placeholder="Title"
-            className="input w-full mb-8"
-          />
-          <textarea
-            value={editingArticle?.body_markdown}
-            onChange={(e) =>
-              setEditingArticle({
-                ...editingArticle,
-                body_markdown: e.target.value,
-              })
-            }
-            className="textarea w-full mb-8"
-            placeholder="Body markdown"
-          ></textarea>
-          <div className="modal-action">
-            <form method="dialog">
-              <button className="btn">Close</button>
-            </form>
-            <button className="btn btn-primary" onClick={saveEditedArticle}>
-              Publish
-            </button>
-          </div>
-        </div>
-      </dialog>
     </div>
   );
 }
